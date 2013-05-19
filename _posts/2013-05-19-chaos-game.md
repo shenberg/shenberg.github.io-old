@@ -77,4 +77,4 @@ do_some_chaos();
 
 My friend Imri wrote [a short post](http://www.algorithm.co.il/blogs/programming/fractals-in-10-minutes-no-5-sierpinski-chaos-game/) on using the chaos game to generate the Sierpinski triangle a good five years ago (before canvas was a thing, really). It's a bit pleasing and worrying at the same time: past me still liked interesting things, but I had no recollection of the matter and it was only five years ago that I had read his post.
 
-If this were the only thing that falls under the purview of the chaos game, it would be cute. The next part, generalizing to IFS, is where things start getting really fun.
+If this were the only thing that falls under the purview of the chaos game, it would be cute. The next part, generalizing to IFS, is where things start getting really fun. urgh github :(
