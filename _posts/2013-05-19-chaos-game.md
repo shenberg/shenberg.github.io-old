@@ -25,7 +25,8 @@ Seeing as it's that simple, I whipped up a quick canvas implementation:
     <button class="btn" id="play">Generate</button>
   </div>
 </div>
-<canvas id='chaos' width='600' height='600'></canvas>
+<canvas id='chaos' width='600' height='600'>
+</canvas>
 
 <script type="text/javascript">
 //<![CDATA[|
