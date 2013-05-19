@@ -1,13 +1,15 @@
 ---
 layout: page
-title: Shenblog
-tagline: Stuff
+title: Musings
+tagline: Things of interest
 ---
 {% include JB/setup %}
 
 <ul class="posts">
   {% for post in site.posts %}
-    <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a></li>
+    <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a><div>
+    {{ post.content | strip_html | truncatewords:90}}<br>
+            <a href="{{ post.url }}">Read more...</a></div></li>
   {% endfor %}
 </ul>
 
