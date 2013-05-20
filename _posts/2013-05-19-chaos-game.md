@@ -22,7 +22,8 @@ Seeing as it's that simple, I whipped up a quick canvas implementation:
   <input type="range" id="points-in" min="5000" max="500000" step="4950" onchange="pointsout.value=value" value="20000"/>
   <output id="pointsout">20000</output>
   <div style="margin-top: 1em">
-    <button class="btn" id="play">Generate</button>
+    <button class="btn" id="play">Generate</button> 
+    <span>Share: </span><input type="text" class="input-xlarge" style="margin-bottom: 0" id="share-link" onclick="this.select();" />
   </div>
 </div>
 <canvas id='chaos' width='600' height='600'>
@@ -32,6 +33,28 @@ Seeing as it's that simple, I whipped up a quick canvas implementation:
 //<![CDATA[|
 var canvas = document.getElementById("chaos"),
     button = document.getElementById("play");
+
+function params_from_hash() {
+  if (location.hash) {
+    var valueStrings = location.hash.split('#')[1].split(','),
+        ratio = parseFloat(valueStrings[0]),
+        n = parseInt(valueStrings[1]),
+        points = parseInt(valueStrings[2]);
+
+    if ((ratio >= 0 ) && (ratio <= 1)) {
+      document.getElementById("range-in").value = ratio;
+      document.getElementById("rangeout").value = ratio;
+    }
+    if ((points >= 5000 ) && (points <= 500000)) {
+      document.getElementById("points-in").value = points;
+      document.getElementById("pointsout").value = points;
+    }
+    if ((n >= 3 ) && (n <= 16)) {
+      document.getElementById("ngon-in").value = n;
+      document.getElementById("ngonout").value = n;
+    }
+  }
+}
 
 function generate_ngon(n, width, height) {
   var points = Array(),
@@ -44,6 +67,7 @@ function generate_ngon(n, width, height) {
   return points;
 }
 
+
 function do_some_chaos() {
   var ratio = document.getElementById("range-in").value,
       n = document.getElementById("ngon-in").value,
@@ -52,6 +76,9 @@ function do_some_chaos() {
       ctx = canvas.getContext('2d'),
       prev_x = Math.floor(Math.random()*canvas.width), // random initial point in the canvas
       prev_y = Math.floor(Math.random()*canvas.height); // strictly speaking, it should be inside the polygon, but this is good enough in practice
+
+  window.location.hash = "#" + ratio + ',' + n + ',' + point_count;
+  document.getElementById('share-link').value = window.location;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'rgba(0,0,0,128)';
@@ -70,7 +97,9 @@ function do_some_chaos() {
   }
 }
 
-button.addEventListener('click', do_some_chaos);
+button.addEventListener('click', do_some_chaos, false);
+
+params_from_hash();
 do_some_chaos();
 //]]>
 </script>
