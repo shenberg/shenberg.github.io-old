@@ -13,6 +13,7 @@ In the [previous post]({% post_url 2013-05-19-chaos-game %}), the original, simp
 To get our fractal, all we do is start with some initial point $$ p $$ and define the set of points in the fractal to be all possible sequences of applying functions from our IFS. So, $$ p $$ is a point in the set, so is $$ f_1(p) $$, and $$ f_1(f_2(f_1(...f_n(f_2(p))...))) $$ is a member too, and so on for every combination of functions. It's here that the fact all these functions are *contractive* is important - this is what guarantees that values don't explode to infinity under repeated function applications.
 
 
+
 Look at pt\*ratio + (1 - ratio)\*random_vertex as an affine function, mention contraction.
 
 <div>
@@ -28,7 +29,7 @@ Look at pt\*ratio + (1 - ratio)\*random_vertex as an affine function, mention co
     </canvas>
     <canvas id="design-overlay" width="500" height="500">
     </canvas>
-  </div>
+  </span>
 </div>
 <script src="/js/fabric.js">
 </script>
@@ -37,9 +38,8 @@ Look at pt\*ratio + (1 - ratio)\*random_vertex as an affine function, mention co
 <script>
 //<![CDATA[|
 
-////////// fabric.js design platform
-var design_canvas = new fabric.Canvas('design-overlay');
-var ifs_canvas = document.getElementById('ifs-renderer');
+var ifs_canvas = document.getElementById('ifs-renderer'),
+    design_canvas; // initialized only after MathJAX is loaded because interactions break otherwise
 
 var rects = [
   new fabric.Rect({width: 250, height: 250, top:125, left:250, fill: 'rgba(0,0,0,0.4)'}),
@@ -55,8 +55,6 @@ var presets = {
     ]
 }
 
-design_canvas.add.apply(design_canvas, rects);
-
 function add_square() {
   design_canvas.add(new fabric.Rect({width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.4)'}));
   do_ifs();
@@ -69,11 +67,6 @@ function delete_selected() {
     do_ifs();
   }
 }
-
-design_canvas.on({
-  'object:modified': do_ifs,
-  'object:selected': bring_to_front,
-})
 
 function bring_to_front(e) {
   e.target.bringToFront();
@@ -125,7 +118,7 @@ function chaos_ifs(matrices) {
     // x[k+1] = randomMatrix*x[k]
     xk = vec2.transformMat2d(xk, xk, randomMatrix);
     // draw with some upscaling of coordinates
-    ctx.fillRect((xk[0]*1.5+0.5)*width, (xk[1]*1.5+0.5)*height,1,1);
+    ctx.fillRect((xk[0]*2+0.5)*width, (xk[1]*2+0.5)*height,1,1);
   }
   var total = (new Date().getTime()) - start_time;
   console.log("drawing time (secs): " + total/1000);
@@ -135,10 +128,20 @@ function params_from_hash(){
 
 }
 
-params_from_hash();
-do_ifs();
+function on_mathjax_load() {
+  design_canvas = new fabric.Canvas('design-overlay');
+  design_canvas.add.apply(design_canvas, rects);
+  design_canvas.on({
+    'object:modified': do_ifs,
+    'object:selected': bring_to_front,
+  })
+  params_from_hash();
+  do_ifs();
+}
 //]]>
 </script>
-
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(on_mathjax_load);
+</script>
 
 
