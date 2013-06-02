@@ -12,9 +12,15 @@ In the [previous post]({% post_url 2013-05-19-chaos-game %}), the original, simp
 
 To get our fractal, all we do is start with some initial point $$ p $$ and define the set of points in the fractal to be all possible sequences of applying functions from our IFS. So, $$ p $$ is a point in the set, so is $$ f_1(p) $$, and $$ f_1(f_2(f_1(...f_n(f_2(p))...))) $$ is a member too, and so on for every combination of functions. It's here that the fact all these functions are *contractive* is important - this is what guarantees that values don't explode to infinity under repeated function applications.
 
+TODO: how does the chaos game work? if we have a point on the set, applying any function to it is another point on the set. Also, points get closer a point will tend towards the fractal if it starts outside of it. randomness guarantees we don't get stuck in 'pathological' function call sequences
 
+TODO: subset of contraction mappings - affine contraction mappings. represent as squares, matrices are easy to work with. 
 
-Look at pt\*ratio + (1 - ratio)\*random_vertex as an affine function, mention contraction.
+TODO: Look at pt\*ratio + (1 - ratio)\*random_vertex as an affine function, mention contraction.
+
+TODO: share url, presets, connect mouseup on slider to do_ifs()
+
+TODO: final notes: weighting the probabilities of functions as another sort of degree of freedom (influences only our visualization, not the set), note that pretty systems can be contractive on average, not strictly contractive. non-linear functions (electric sheep)
 
 <div>
   <label for="points-in">Number of points to draw:</label>
