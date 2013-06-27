@@ -2,30 +2,45 @@
 layout: post
 category : interesting
 tagline: ""
-tags : [canvas, chaos]
 ---
 {% include JB/setup %}
+<!-- Hack -->
 
 The [Chaos Game](http://en.wikipedia.org/wiki/Chaos_game) is a super-simple way to generate fractals. In its most simple form, just create a regular triangle, square (, 4-gon, 5-gon, ..., n-gon), choose a random point in it and a ratio smaller than 1. Then, repeatedly take the point at _ratio_ between the current point and a randomly selected vertex of the polygon.
 
-Throw away the first few points and you may get a fractal (the process doesn't necessarily converge).
+Throw away the first few points and you may get a fractal. 
 
 Seeing as it's that simple, I whipped up a quick canvas implementation:
-<div>
-  <label for="range-in">Ratio:</label>
-  <input type="range" id="range-in" min="0" max="1" step="0.01" onchange="rangeout.value=value" />
-  <output id="rangeout">0.5</output>
-  <label for="ngon-in">Amout of sides:</label>
-  <input type="range" id="ngon-in" min="3" max="16" step="1" onchange="ngonout.value=value" value="3"/>
-  <output id="ngonout">3</output>
-  <label for="points-in">Number of points to draw:</label>
-  <input type="range" id="points-in" min="5000" max="500000" step="4950" onchange="pointsout.value=value" value="20000"/>
-  <output id="pointsout">20000</output>
-  <div style="margin-top: 1em">
-    <button class="btn" id="play">Generate</button> 
-    <span>Share: </span><input type="text" class="input-xlarge" style="margin-bottom: 0" id="share-link" onclick="this.select();" />
+<!-- more -->
+<form>
+  <div class="clearfix">
+    <label for="range-in">Ratio:</label>
+    <div class="input">
+      <input type="range" id="range-in" min="0" max="1" step="0.01" onchange="rangeout.value=value" />
+      <output id="rangeout">0.5</output>
+    </div>
   </div>
-</div>
+  <div class="clearfix">
+    <label for="ngon-in">Amout of sides:</label>
+    <div class="input">
+      <input type="range" id="ngon-in" min="3" max="16" step="1" onchange="ngonout.value=value" value="3"/>
+      <output id="ngonout">3</output>
+    </div>
+  </div>
+  <div class="clearfix">
+    <label for="points-in">Number of points to draw:</label>
+    <div class="input">
+      <input type="range" id="points-in" min="5000" max="500000" step="4950" onchange="pointsout.value=value" value="20000"/>
+      <output id="pointsout">20000</output>
+    </div>
+  </div>
+  <div class="clearfix">
+    <button class="btn" type="button" id="play" style="float:left">Generate</button> 
+    <div class="input">
+      <span>Share: </span><input type="text" class="input-xlarge" style="margin-bottom: 0" id="share-link" onclick="this.select();" />
+    </div>
+  </div>
+</form>
 <canvas id='chaos' width='600' height='600'>
 </canvas>
 
@@ -82,6 +97,9 @@ function do_some_chaos() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'rgba(0,0,0,128)';
+
+  var start_time = +new Date();
+  
   // skip the first 100 points
   for (var i = 0; i < 100; i++) {
     var randomIndex = Math.floor(Math.random()*points.length/2) * 2,
@@ -95,6 +113,8 @@ function do_some_chaos() {
         prev_y = prev_y*ratio + (1-ratio)*points[randomIndex+1];
     ctx.fillRect(prev_x,prev_y,1,1);
   }
+
+  console.log("Took " + (((new Date()) - start_time) / 1000) + " seconds to run");
 }
 
 button.addEventListener('click', do_some_chaos, false);
