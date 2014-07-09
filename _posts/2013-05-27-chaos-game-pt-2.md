@@ -31,6 +31,12 @@ TODO: final notes: weighting the probabilities of functions as another sort of d
       <output id="pointsout">20000</output>
     </div>
   </div>
+  <div class="clearfix">
+    <label for="points-in">Color of current square:</label>
+    <div class="input">
+      <input type="color" id="color-field" value="#000"/>
+    </div>
+  </div>
   <br>
   <button onclick="add_square()" type="button" class="btn">Add Square
   </button>
@@ -67,7 +73,7 @@ var presets = {
 }
 
 function make_ifs_element(options) {
-  var base = {width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.4)'};
+  var base = {width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.5)'};
   for(key in options) {
     if (options.hasOwnProperty(key)) {
       base[key] = options[key];
@@ -99,12 +105,58 @@ function delete_selected() {
 
 function bring_to_front(e) {
   e.target.bringToFront();
+  update_colorpicker(e);
+}
+
+
+function fill_to_rgb(fill) {
+  var vals = /rgba\((\d+),(\d+),(\d+),/.exec(fill),
+    output = "#";
+
+  for (var i = 1; i <= 3; i++) {
+    var hex_part = parseInt(vals[i]).toString(16);
+    if (hex_part.length === 1) {
+      hex_part = "0" + hex_part;
+    }
+    output += hex_part;
+  }
+  return output;
+}
+
+function rgb_to_fill(rgb) {
+  console.log(rgb);
+  var vals = /\#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/.exec(rgb),
+      r = parseInt(vals[1],16),
+      g = parseInt(vals[2],16),
+      b = parseInt(vals[3],16);
+  return 'rgba(' + r + ',' + g + ',' + b +',0.5)';
+}
+
+function update_colorpicker(e) {
+  var selected = design_canvas.getActiveObject();
+  if (selected) {
+    var newColor = fill_to_rgb(selected.item(1).fill),
+        picker = document.getElementById("color-field");
+
+    picker.value = newColor;
+  }
+}
+
+function colorpicker_changed(e) {
+  var selected = design_canvas.getActiveObject();
+  if (selected) {
+    var picker = document.getElementById("color-field");
+    selected.set({fill:rgb_to_fill(picker.value)});
+    //TODO:maybe?
+    do_ifs();
+  }
 }
 // actual IFS code
-
+// turn ui data into matrices and colors
 function do_ifs(e) {
   //TODO: redraw
   var matrices = [],
+      colors = [],
       width = design_canvas.width,
       height = design_canvas.height;
 
@@ -121,12 +173,14 @@ function do_ifs(e) {
     mat2d.scale(matrix, matrix, [obj.scaleX * 0.5, obj.scaleY * 0.5]);
     mat2d.rotate(matrix, matrix, -obj.angle*Math.PI/180);
     matrices.push(matrix);
+    // get color from the rectangle's fill
+    colors.push(obj.item(0).fill);
   });
   console.log(matrices);
-  chaos_ifs(matrices);
+  chaos_ifs(matrices, colors);
 }
 // use the chaos game to approximate a solution to the IFS
-function chaos_ifs(matrices) {
+function chaos_ifs(matrices, colors) {
   var point_count = document.getElementById("points-in").value,
       width = ifs_canvas.width,
       height = ifs_canvas.height,
@@ -143,7 +197,9 @@ function chaos_ifs(matrices) {
     xk = vec2.transformMat2d(xk, xk, randomMatrix);
   }
   for (var i = 0; i < point_count - 100; i++) {
-    var randomMatrix = matrices[(Math.random()*matrices.length) | 0];
+    var idx = ((Math.random()*matrices.length) | 0),
+        randomMatrix = matrices[idx];
+    ctx.fillStyle=colors[idx];
     // x[k+1] = randomMatrix*x[k]
     xk = vec2.transformMat2d(xk, xk, randomMatrix);
     // "cheating" by scaling components by a factor of 2 - make sure we fill the 
@@ -199,6 +255,7 @@ function params_from_hash(){
 }
 
 function on_mathjax_load() {
+  document.getElementById('color-field').addEventListener('change',function() {colorpicker_changed()}, false);
   design_canvas = new fabric.Canvas('design-overlay');
   //design_canvas.add.apply(design_canvas, rects);
   apply_transforms(presets['sierpinski']);
