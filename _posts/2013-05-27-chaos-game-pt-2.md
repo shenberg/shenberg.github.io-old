@@ -53,21 +53,39 @@ var ifs_canvas = document.getElementById('ifs-renderer'),
     design_canvas; // initialized only after MathJAX is loaded because interactions break otherwise
 
 var rects = [
-  new fabric.Rect({width: 250, height: 250, top:125, left:250, fill: 'rgba(0,0,0,0.4)'}),
-  new fabric.Rect({width: 250, height: 250, top:375, left:125, fill: 'rgba(0,0,0,0.4)'}),
-  new fabric.Rect({width: 250, height: 250, top:375, left:375, fill: 'rgba(0,0,0,0.4)'}),
+  make_ifs_element({top: 125, left: 250}),
+  make_ifs_element({top: 375, left: 125}),
+  make_ifs_element({top: 375, left: 375})
 ];
 
 var presets = {
   sierpinski: [
-    {top:125,left:250,scale_x:1,scale_y:1, angle:0},
-    {top:375,left:125,scale_x:1,scale_y:1, angle:0},
-    {top:375,left:375,scale_x:1,scale_y:1, angle:0}
+    {top:125,left:250,scaleX:1,scaleY:1, angle:0},
+    {top:375,left:125,scaleX:1,scaleY:1, angle:0},
+    {top:375,left:375,scaleX:1,scaleY:1, angle:0}
     ]
 }
 
+function make_ifs_element(options) {
+  var base = {width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.4)'};
+  for(key in options) {
+    if (options.hasOwnProperty(key)) {
+      base[key] = options[key];
+    }
+  }
+
+  var orientation_highlight = new fabric.Path('M 150 -115 L 240 -115 L 240 -25');
+  orientation_highlight.set({fill:'rgba(0,0,0,0)', stroke: 'rgba(1,1,1)', opacity:0.8});
+
+
+  var group = new fabric.Group([new fabric.Rect({width:250, height:250,top:0,left:125, fill:base.fill}),
+    orientation_highlight], base);
+  return group;
+}
+
 function add_square() {
-  design_canvas.add(new fabric.Rect({width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.4)'}));
+  //design_canvas.add(new fabric.Rect({width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.4)'}));
+  design_canvas.add(make_ifs_element());
   do_ifs();
 }
 
@@ -140,7 +158,7 @@ function apply_transforms(transforms) {
   design_canvas.clear();
   for (var i = 0; i < transforms.length; i++) {
     xform = transforms[i];
-    design_canvas.add(new fabric.Rect({
+    /*design_canvas.add(new fabric.Rect({
       top: xform.top,
       left: xform.left,
       width: 250,
@@ -149,7 +167,8 @@ function apply_transforms(transforms) {
       scaleY: xform.scale_y,
       angle: xform.angle,
       fill: 'rgba(0,0,0,0.4)'
-    }));
+    }));*/
+    design_canvas.add(make_ifs_element(xform));
   }
 }
 
@@ -171,8 +190,8 @@ function params_from_hash(){
     transforms.push({
       top: parseFloat(valueStrings.shift()),
       left: parseFloat(valueStrings.shift()),
-      scale_x: parseFloat(valueStrings.shift()),
-      scale_y: parseFloat(valueStrings.shift()),
+      scaleX: parseFloat(valueStrings.shift()),
+      scaleY: parseFloat(valueStrings.shift()),
       angle: parseFloat(valueStrings.shift())
     });
   }
