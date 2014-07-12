@@ -32,9 +32,15 @@ TODO: final notes: weighting the probabilities of functions as another sort of d
     </div>
   </div>
   <div class="clearfix">
-    <label for="points-in">Color of current square:</label>
+    <label for="color-field">Color of current square:</label>
     <div class="input">
-      <input type="color" id="color-field" value="#000"/>
+      <input type="color" id="color-field" value="#fff"/>
+    </div>
+  </div>
+  <div class="clearfix">
+    <div class="input"> 
+      <label for="show-overlay">Show design overlay</label>
+      <input type="checkbox" id="show-overlay" checked="true"> 
     </div>
   </div>
   <br>
@@ -42,7 +48,7 @@ TODO: final notes: weighting the probabilities of functions as another sort of d
   </button>
   <button onclick="delete_selected()" type="button" class="btn">Delete Selected Square</button>
   <span style='position: relative; display: inline-block; margin-top: 1em; border: 1px solid #444'>
-    <canvas id="ifs-renderer" width="500" height="500" style="position: absolute">
+    <canvas id="ifs-renderer" width="500" height="500" style="position: absolute; background-color:black">
     </canvas>
     <canvas id="design-overlay" width="500" height="500">
     </canvas>
@@ -72,8 +78,10 @@ var presets = {
     ]
 }
 
+var base_color = 'rgba(255,255,255,0.5)'; // color
+
 function make_ifs_element(options) {
-  var base = {width: 250, height: 250, top:250, left:250, fill: 'rgba(0,0,0,0.5)'};
+  var base = {width: 250, height: 250, top:250, left:250, fill: base_color};
   for(key in options) {
     if (options.hasOwnProperty(key)) {
       base[key] = options[key];
@@ -152,6 +160,7 @@ function colorpicker_changed(e) {
   }
 }
 // actual IFS code
+
 // turn ui data into matrices and colors
 function do_ifs(e) {
   //TODO: redraw
@@ -172,10 +181,23 @@ function do_ifs(e) {
     // note: I'm increasing scale by a bit to let you manipulate smaller objects in the UI
     mat2d.scale(matrix, matrix, [obj.scaleX * 0.5, obj.scaleY * 0.5]);
     mat2d.rotate(matrix, matrix, -obj.angle*Math.PI/180);
-    matrices.push(matrix);
+    matrices.push((function(mat){
+      // bind transform to specific matris
+      return function(v) { 
+        return vec2.transformMat2d(v, v, mat);
+      }
+    })(matrix));
     // get color from the rectangle's fill
     colors.push(obj.item(0).fill);
   });
+  // test
+  matrices.push(function(v) {
+    var x = v[0], y=v[1];
+    v[0] = (x+0.5)*Math.cos(y*4*Math.PI)/4;
+    v[1] = (x+0.5)*Math.sin(y*4*Math.PI)/4;
+    return v;
+  });
+  colors.push('rgba(256,0,0,0.5');
   console.log(matrices);
   chaos_ifs(matrices, colors);
 }
@@ -188,20 +210,22 @@ function chaos_ifs(matrices, colors) {
       xk = vec2.fromValues(Math.random() - 0.5, Math.random() - 0.5);
 
   ctx.clearRect(0, 0, ifs_canvas.width, ifs_canvas.height);
-  ctx.fillStyle = 'rgba(0,0,0,128)';
+  ctx.fillStyle = base_color;
   var start_time = new Date().getTime();
   // skip first 100 points
   for (var i = 0; i < point_count - 100; i++) {
-    var randomMatrix = matrices[(Math.random()*matrices.length) | 0];
+    var randomTransform = matrices[(Math.random()*matrices.length) | 0];
     // x[k+1] = randomMatrix*x[k]
-    xk = vec2.transformMat2d(xk, xk, randomMatrix);
+    //xk = vec2.transformMat2d(xk, xk, randomMatrix);
+    xk = randomTransform(xk);
   }
   for (var i = 0; i < point_count - 100; i++) {
     var idx = ((Math.random()*matrices.length) | 0),
-        randomMatrix = matrices[idx];
+        randomTransform = matrices[idx];
     ctx.fillStyle=colors[idx];
     // x[k+1] = randomMatrix*x[k]
-    xk = vec2.transformMat2d(xk, xk, randomMatrix);
+    //xk = vec2.transformMat2d(xk, xk, randomMatrix);
+    xk = randomTransform(xk);
     // "cheating" by scaling components by a factor of 2 - make sure we fill the 
     ctx.fillRect((xk[0]*2+0.5)*width, (xk[1]*2+0.5)*height,1,1);
   }
@@ -256,6 +280,14 @@ function params_from_hash(){
 
 function on_mathjax_load() {
   document.getElementById('color-field').addEventListener('change',function() {colorpicker_changed()}, false);
+  document.getElementById('show-overlay').addEventListener('change', function() { 
+    var canvas = document.getElementById('design-overlay');
+    if (document.getElementById('show-overlay').checked) {
+      canvas.style.display = '';
+    } else {
+      canvas.style.display = 'none';
+    }
+  });
   design_canvas = new fabric.Canvas('design-overlay');
   //design_canvas.add.apply(design_canvas, rects);
   apply_transforms(presets['sierpinski']);
